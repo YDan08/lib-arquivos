@@ -4,12 +4,21 @@ import fs from "fs"
 
 const caminho = process.argv
 
-const imprimeLista = resultado => {
-	console.log(chalk.yellow("lista de links"), resultado)
+const imprimeLista = (resultado, identificador = "") => {
+	console.log(chalk.yellow("lista de links"), chalk.black.bgGreen(identificador), resultado)
 }
 
 const processaTexto = async argumentos => {
 	const caminho = argumentos[2]
+
+	try {
+		fs.lstatSync(caminho)
+	} catch (erro) {
+		if (erro.code === "ENOENT") {
+			console.log("arquivo ou diretório não existe")
+			return
+		}
+	}
 
 	if (fs.lstatSync(caminho).isFile()) {
 		const resultado = await pegaArquivo(caminho)
@@ -18,7 +27,7 @@ const processaTexto = async argumentos => {
 		const arquivos = await fs.promises.readdir(caminho)
 		arquivos.forEach(async nomeArquivo => {
 			const lista = await pegaArquivo(`${caminho}/${nomeArquivo}`)
-			imprimeLista(lista)
+			imprimeLista(lista, nomeArquivo)
 		})
 		console.log(arquivos)
 	}
